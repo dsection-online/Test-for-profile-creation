@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>chat Selection</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1s ease;
+    }
+
+    .profile-info {
+      margin-bottom: 20px;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 2px solid #888;
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.1);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background-color: #2a2a2a;
+      color: white;
+      resize: none;
+      height: 80px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #3f51b5;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-info">
+      <img src="default-profile.png" alt="Profile Picture" class="profile-pic" id="profilePic">
+      <h3 id="username">Hello, User!</h3>
+    </div>
+
+    <textarea placeholder="welcome jako,please jhat i mean chat" disabled></textarea>
+
+    <button onclick="goToSection()">Choose Section</button>
+  </div>
+
+  <script>
+    // Load stored username and profile picture
+    const username = localStorage.getItem("name") || localStorage.getItem("username");
+    const profilePicURL = localStorage.getItem("profilePic");
+
+    if (username) {
+      document.getElementById("username").textContent = "Hello, " + username + "!";
+    }
+
+    if (profilePicURL) {
+      document.getElementById("profilePic").src = profilePicURL;
+    }
+
+    function goToSection() {
+      window.location.href = "section-choose.html";
+    }
+  </script>
+</body>
+</html>
