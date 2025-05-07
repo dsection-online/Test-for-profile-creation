@@ -2,229 +2,230 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Section Chat</title>
+  <title>All Sections Chat</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #2c2f38;
-      color: #fff;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
 
     /* Sidebar styles */
     .sidebar {
-      height: 100%;
-      width: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: #1f1f1f;
       position: fixed;
-      z-index: 1;
+      left: -250px;
       top: 0;
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .sidebar.active {
       left: 0;
-      background-color: #333;
-      overflow-x: hidden;
-      transition: 0.3s;
-      padding-top: 60px;
     }
 
-    .sidebar a {
-      padding: 8px 8px 8px 32px;
-      text-decoration: none;
-      font-size: 25px;
-      color: white;
-      display: block;
-      transition: 0.3s;
+    .sidebar h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
     }
 
-    .sidebar a:hover {
-      background-color: #575757;
-    }
-
-    .sidebar .close-btn {
-      position: absolute;
-      top: 0;
-      right: 25px;
-      font-size: 36px;
-      margin-left: 50px;
-    }
-
-    .open-sidebar-btn {
-      font-size: 30px;
-      background-color: #333;
-      color: white;
-      padding: 10px;
+    .sidebar button {
+      background: none;
       border: none;
+      color: white;
+      text-align: left;
+      padding: 10px 0;
+      font-size: 16px;
       cursor: pointer;
-      display: inline-block;
+    }
+
+    .sidebar .friends {
+      margin-top: 20px;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+
+    /* Toggle button */
+    .toggle-btn {
       position: absolute;
       top: 20px;
       left: 20px;
+      background-color: #3f51b5;
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 2;
     }
 
-    /* Chat window container */
-    .chat-container {
+    /* Main content */
+    .main {
+      flex-grow: 1;
+      padding: 50px 20px 20px 80px;
       margin-left: 0;
-      transition: margin-left .3s;
-      padding: 20px;
+      transition: margin-left 0.3s ease;
     }
 
-    .chat-header {
-      background-color: #333;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 20px;
+    .sidebar.active ~ .main {
+      margin-left: 250px;
     }
 
+    h1 {
+      margin-top: 0;
+    }
+
+    .friend-link {
+      color: #80cbc4;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .friend-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Chat section */
     .chat-window {
-      background-color: #444;
-      padding: 20px;
-      height: calc(100vh - 160px);
+      flex-grow: 1;
       overflow-y: auto;
-      border-radius: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 60px; /* Space for the message input */
+      padding: 20px;
+      background-color: #2a2a2a;
+      border-radius: 12px;
     }
 
     .message {
+      background-color: #444;
+      padding: 8px;
+      border-radius: 5px;
       margin-bottom: 10px;
     }
 
-    .sender-name {
-      font-weight: bold;
+    .message.own {
+      background-color: #3f51b5;
+      color: white;
     }
 
-    .message-text {
-      color: #ddd;
+    .message p {
+      margin: 0;
+    }
+
+    .message span {
+      font-size: 12px;
+      color: #bbb;
+    }
+
+    .message-header {
+      font-weight: bold;
+      color: #80cbc4;
+      margin-bottom: 5px;
     }
 
     .message-input {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
       background-color: #333;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       color: white;
-    }
-
-    .message-send-btn {
-      background-color: #444;
-      color: white;
-      border: none;
-      padding: 10px;
-      cursor: pointer;
-      margin-top: 10px;
-      width: 100%;
       font-size: 16px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      margin: 0;
     }
-
-    /* Hide and show elements based on chat type */
-    .section-chat, .global-chat {
-      display: none;
-    }
-
-    .section-chat.active, .global-chat.active {
-      display: block;
-    }
-
   </style>
 </head>
 <body>
 
-  <!-- Sidebar (hidden by default) -->
-  <div id="sidebar" class="sidebar">
-    <button class="close-btn" onclick="closeSidebar()">&times;</button>
-    <a href="a-section.html" onclick="navigateToSection('a-section')">A-section</a>
-    <a href="b-section.html" onclick="navigateToSection('b-section')">B-section</a>
-    <a href="c-section.html" onclick="navigateToSection('c-section')">C-section</a>
-    <a href="d-section.html" onclick="navigateToSection('d-section')">D-section</a>
-    <a href="e-section.html" onclick="navigateToSection('e-section')">E-section</a>
-    <a href="co-chat.html" onclick="navigateToGlobalChat()">Global Chat</a>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h3>Menu</h3>
+    <button onclick="goTo('a-section.html')">A-section</button>
+    <button onclick="goTo('b-section.html')">B-section</button>
+    <button onclick="goTo('c-section.html')">C-section</button>
+    <button onclick="goTo('d-section.html')">D-section</button>
+    <button onclick="goTo('e-section.html')">E-section</button>
+    <button onclick="goTo('co-chat.html')">All Sections Chat</button>
+    <button onclick="goTo('add-friends.html')">Add Friends</button>
+
+    <div class="friends">
+      <h3>Friends</h3>
+      <div id="friendList">Loading...</div>
+    </div>
   </div>
 
-  <!-- Main content area -->
-  <div class="chat-container" id="chatContainer">
-    <button class="open-sidebar-btn" onclick="openSidebar()">&#9776; Menu</button>
+  <!-- Toggle Button -->
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <!-- Chat header -->
-    <div class="chat-header" id="chatHeader">
-      E-section Chat
-      <p>please your section is the most teeda so no rules for you guys</p>
+  <!-- Main Content -->
+  <div class="main">
+    <h1>E section</h1>
+    <p>you guys get no rules because your section teeda</p>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chatWindow">
+      <!-- Messages will appear here -->
     </div>
-
-    <!-- Section chat window -->
-    <div class="chat-window section-chat active" id="sectionChat">
-      <!-- Messages for A-section will appear here -->
-    </div>
-
-    <!-- Global chat window -->
-    <div class="chat-window global-chat" id="globalChat">
-      <!-- Global chat messages will appear here -->
-    </div>
-
-    <!-- Message input area -->
-    <textarea class="message-input" id="messageInput" placeholder="Type a message..."></textarea>
-    <button class="message-send-btn" onclick="sendMessage()">Send</button>
   </div>
+
+  <!-- Message Input -->
+  <textarea class="message-input" id="messageInput" placeholder="Type a message..."></textarea>
 
   <script>
-    // Open sidebar
-    function openSidebar() {
-      document.getElementById("sidebar").style.width = "250px";
-      document.getElementById("chatContainer").style.marginLeft = "250px";
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("active");
     }
 
-    // Close sidebar
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-      document.getElementById("chatContainer").style.marginLeft = "0";
+    function goTo(page) {
+      window.location.href = page;
     }
 
-    // Send message function
-    function sendMessage() {
-      const messageInput = document.getElementById('messageInput');
-      const message = messageInput.value.trim();
-      if (message) {
-        appendMessage(message, 'User', 'sectionChat'); // Add message to section chat
-        appendMessage(message, 'User', 'globalChat');  // Add message to global chat
+    // Load friends from localStorage
+    const friendListDiv = document.getElementById("friendList");
+    const friends = JSON.parse(localStorage.getItem("friends")) || [];
+
+    if (friends.length === 0) {
+      friendListDiv.innerHTML = "<p>No friends added yet.</p>";
+    } else {
+      friendListDiv.innerHTML = "";
+      friends.forEach(friend => {
+        const friendEl = document.createElement("div");
+        friendEl.className = "friend-link";
+        friendEl.textContent = friend;
+        friendEl.onclick = () => goTo(`chat-${friend}.html`);
+        friendListDiv.appendChild(friendEl);
+      });
+    }
+
+    // Get the current user's name (stored in localStorage)
+    const username = localStorage.getItem("username") || "Anonymous";
+
+    // Handle message sending
+    document.getElementById("messageInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        const messageText = this.value.trim();
+        if (messageText) {
+          const message = document.createElement("div");
+          message.className = "message own";
+          message.innerHTML = `<div class="message-header">${username}</div><p>${messageText}</p><span>Just now</span>`;
+          document.getElementById("chatWindow").appendChild(message);
+          this.value = "";
+        }
       }
-      messageInput.value = ''; // Clear the input field
-    }
-
-    // Append message to chat window
-    function appendMessage(message, sender, chatType) {
-      const chatWindow = document.getElementById(chatType);
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message');
-      messageDiv.innerHTML = `<div class="sender-name">${sender}</div><div class="message-text">${message}</div>`;
-      chatWindow.appendChild(messageDiv);
-      chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to the bottom
-    }
-
-    // Toggle between section chat and global chat
-    function toggleChat(chatType) {
-      const sectionChat = document.getElementById('sectionChat');
-      const globalChat = document.getElementById('globalChat');
-      
-      if (chatType === 'section') {
-        sectionChat.classList.add('active');
-        globalChat.classList.remove('active');
-      } else {
-        sectionChat.classList.remove('active');
-        globalChat.classList.add('active');
-      }
-    }
-
-    // Navigate to a specific section (redirects to section page)
-    function navigateToSection(section) {
-      window.location.href = section + '.html';
-    }
-
-    // Navigate to global chat
-    function navigateToGlobalChat() {
-      window.location.href = 'co-chat.html';
-    }
+    });
   </script>
-
 </body>
 </html>
