@@ -1,200 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Edit Profile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
+      margin: 0;
+      font-family: Arial, sans-serif;
       background-color: #121212;
       color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .container {
       display: flex;
-      background: #1e1e1e;
-      border-radius: 12px;
+      background-color: #1e1e1e;
       padding: 30px;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-      max-width: 900px;
-      width: 90%;
-      gap: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
-    .left, .right {
-      flex: 1;
+    .form-section {
+      margin-right: 40px;
     }
 
-    input, textarea {
-      width: 100%;
+    .form-section input, textarea {
+      display: block;
+      margin-bottom: 15px;
       padding: 10px;
-      margin: 10px 0;
-      background: #2e2e2e;
+      width: 250px;
+      border: none;
+      border-radius: 5px;
+      background-color: #2e2e2e;
       color: white;
-      border: 1px solid #444;
-      border-radius: 8px;
     }
 
-    button {
+    .form-section button {
       padding: 10px 20px;
       background-color: #4caf50;
-      color: white;
       border: none;
-      border-radius: 8px;
+      color: white;
+      border-radius: 5px;
       cursor: pointer;
+    }
+
+    .image-upload {
+      text-align: center;
+    }
+
+    .image-upload input {
       margin-top: 10px;
     }
 
-    button:hover {
-      background-color: #388e3c;
+    .tos-section {
+      margin-top: 20px;
+      font-size: 0.9em;
     }
 
-    .profile-pic {
-      width: 100%;
-      max-width: 200px;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 10px;
+    .tos-box {
+      display: none;
       background-color: #2e2e2e;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
     }
 
-    a {
+    .tos-toggle {
       color: #4caf50;
       cursor: pointer;
       text-decoration: underline;
     }
 
-    #termsText {
+    .tos-section input[type="checkbox"] {
       margin-top: 10px;
-      font-size: 0.9em;
-      display: none;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="left">
-    <h2>Edit Profile</h2>
-    <form id="profileForm">
-      <input type="text" id="name" placeholder="Your Name" />
+  <div class="container">
+    <div class="form-section">
+      <h2>Edit Your Profile</h2>
+      <input type="text" id="name" placeholder="Full Name">
       <textarea id="hobbies" placeholder="Your Hobbies"></textarea>
 
-      <!-- Terms of Service -->
-      <div style="margin-top: 20px;">
-        <a onclick="toggleTerms()">View Terms of Service</a>
-        <div id="termsText">
-          <p>
-            By editing your profile, you agree to follow community guidelines, respect others' content, and not misuse this platform. Your data will be stored securely and used only for platform functionality.
-          </p>
-          <label>
-            <input type="checkbox" id="agreeTerms" /> I agree to the Terms of Service
-          </label>
+      <div class="tos-section">
+        <span class="tos-toggle" onclick="toggleTOS()">View Terms of Service</span>
+        <div class="tos-box" id="tosBox">
+          By using this app, you agree to keep your content respectful and follow all community rules.
         </div>
+        <label><input type="checkbox" id="agree"> I agree to the Terms of Service</label>
       </div>
 
-      <button type="submit" disabled>Save Changes</button>
-    </form>
+      <button onclick="saveProfile()">Save Changes</button>
+    </div>
+
+    <div class="image-upload">
+      <h3>Upload Profile Picture</h3>
+      <input type="file" id="profilePic">
+    </div>
   </div>
 
-  <div class="right">
-    <h3>Profile Picture</h3>
-    <img src="" alt="Profile Picture" id="profilePic" class="profile-pic" />
-    <input type="file" id="photoInput" accept="image/*" />
-    <button type="button" onclick="uploadPhoto()">Upload Photo</button>
-  </div>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+      authDomain: "section-is-united.firebaseapp.com",
+      projectId: "section-is-united",
+      storageBucket: "section-is-united.appspot.com",
+      messagingSenderId: "32995484693",
+      appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
-    authDomain: "section-is-united.firebaseapp.com",
-    projectId: "section-is-united",
-    storageBucket: "section-is-united.appspot.com",
-    messagingSenderId: "32995484693",
-    appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
+    async function saveProfile() {
+      const username = localStorage.getItem("username");
+      const name = document.getElementById("name").value;
+      const hobbies = document.getElementById("hobbies").value;
+      const agreed = document.getElementById("agree").checked;
+      const profilePic = document.getElementById("profilePic").files[0];
 
-  const username = localStorage.getItem("username");
-  const nameInput = document.getElementById("name");
-  const hobbiesInput = document.getElementById("hobbies");
-  const profilePic = document.getElementById("profilePic");
-  const saveButton = document.querySelector("#profileForm button");
-  const agreeCheckbox = document.getElementById("agreeTerms");
+      if (!username) {
+        alert("Username not found. Please register again.");
+        window.location.href = "registration.html";
+        return;
+      }
 
-  // Load profile data
-  async function loadProfile() {
-    if (!username) return alert("No user logged in.");
-    const docRef = doc(db, "users", username);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      nameInput.value = data.name || "";
-      hobbiesInput.value = data.hobbies || "";
-      profilePic.src = data.photoURL || "https://via.placeholder.com/200";
+      if (!agreed) {
+        alert("You must agree to the Terms of Service.");
+        return;
+      }
+
+      let photoURL = "";
+
+      if (profilePic) {
+        const picRef = ref(storage, `profilePics/${username}.jpg`);
+        await uploadBytes(picRef, profilePic);
+        photoURL = await getDownloadURL(picRef);
+      }
+
+      await setDoc(doc(db, "users", username), {
+        username,
+        name,
+        hobbies,
+        profilePic: photoURL
+      });
+
+      alert("Profile saved!");
+      window.location.href = "dashboard.html";
     }
-  }
 
-  loadProfile();
-
-  // Form submit
-  document.getElementById("profileForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!username) return alert("No user logged in.");
-    if (!agreeCheckbox.checked) return alert("Please agree to the Terms of Service.");
-
-    const docRef = doc(db, "users", username);
-    await updateDoc(docRef, {
-      name: nameInput.value,
-      hobbies: hobbiesInput.value
-    });
-
-    alert("Profile updated!");
-  });
-
-  // Upload profile photo
-  window.uploadPhoto = async function () {
-    const file = document.getElementById("photoInput").files[0];
-    if (!file) return alert("Please select a file.");
-
-    const storageRef = ref(storage, `profile_pics/${username}.jpg`);
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-
-    const docRef = doc(db, "users", username);
-    await updateDoc(docRef, { photoURL: downloadURL });
-
-    profilePic.src = downloadURL;
-    alert("Photo uploaded!");
-  };
-
-  // Terms toggle
-  window.toggleTerms = function () {
-    const terms = document.getElementById("termsText");
-    terms.style.display = terms.style.display === "none" ? "block" : "none";
-  };
-
-  // Enable save only if terms agreed
-  agreeCheckbox.addEventListener("change", () => {
-    saveButton.disabled = !agreeCheckbox.checked;
-  });
-</script>
+    function toggleTOS() {
+      const box = document.getElementById("tosBox");
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    }
+  </script>
 
 </body>
-</html>
+  </html>
