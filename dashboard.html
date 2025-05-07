@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #1e1e1e;
+      height: 100vh;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    }
+
+    .sidebar a {
+      display: block;
+      color: #ccc;
+      text-decoration: none;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .sidebar a:hover {
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .profile img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #4caf50;
+    }
+
+    .features {
+      margin-top: 40px;
+    }
+
+    .features h2 {
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .feature-item {
+      background-color: #1e1e1e;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .feature-item img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .feature-item p {
+      margin-top: 10px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <a href="dashboard.html">Home</a>
+    <a href="stories.html">Stories</a>
+    <a href="chat.html">Chat</a>
+    <a href="homework.html">Homework</a>
+  </div>
+
+  <div class="main">
+    <div class="profile">
+      <img id="profilePhoto" src="default.jpg" alt="Profile Picture">
+      <h1>Hello, <span id="userName">User</span>!</h1>
+    </div>
+
+    <div class="features">
+      <h2>Features</h2>
+      <div class="grid">
+        <div class="feature-item">
+          <img src="https://via.placeholder.com/150" alt="Feature 1">
+          <p>Story Sharing</p>
+        </div>
+        <div class="feature-item">
+          <img src="https://via.placeholder.com/150" alt="Feature 2">
+          <p>Instant Chat</p>
+        </div>
+        <div class="feature-item">
+          <img src="https://via.placeholder.com/150" alt="Feature 3">
+          <p>Homework Help</p>
+        </div>
+        <div class="feature-item">
+          <img src="https://via.placeholder.com/150" alt="Feature 4">
+          <p>Creative Notes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+      authDomain: "section-is-united.firebaseapp.com",
+      projectId: "section-is-united",
+      storageBucket: "section-is-united.appspot.com",
+      messagingSenderId: "32995484693",
+      appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const username = localStorage.getItem("username");
+
+    async function loadUserData() {
+      if (!username) return;
+      const docRef = doc(db, "users", username);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById("userName").textContent = data.name || username;
+        if (data.profilePic) {
+          document.getElementById("profilePhoto").src = data.profilePic;
+        }
+      } else {
+        alert("User data not found.");
+      }
+    }
+
+    loadUserData();
+  </script>
+
+</body>
+</html>
