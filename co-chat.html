@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Sections Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background-color: #1f1f1f;
+      position: fixed;
+      left: -250px;
+      top: 0;
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      text-align: left;
+      padding: 10px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .sidebar .friends {
+      margin-top: 20px;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+
+    /* Toggle button */
+    .toggle-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #3f51b5;
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    /* Main content */
+    .main {
+      flex-grow: 1;
+      padding: 50px 20px 20px 80px;
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+    }
+
+    .sidebar.active ~ .main {
+      margin-left: 250px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .friend-link {
+      color: #80cbc4;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .friend-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Chat section */
+    .chat-window {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 60px; /* Space for the message input */
+      padding: 20px;
+      background-color: #2a2a2a;
+      border-radius: 12px;
+    }
+
+    .message {
+      background-color: #444;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .message.own {
+      background-color: #3f51b5;
+      color: white;
+    }
+
+    .message p {
+      margin: 0;
+    }
+
+    .message span {
+      font-size: 12px;
+      color: #bbb;
+    }
+
+    .message-header {
+      font-weight: bold;
+      color: #80cbc4;
+      margin-bottom: 5px;
+    }
+
+    .message-input {
+      width: 100%;
+      padding: 10px;
+      background-color: #333;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h3>Menu</h3>
+    <button onclick="goTo('a-section.html')">A-section</button>
+    <button onclick="goTo('b-section.html')">B-section</button>
+    <button onclick="goTo('c-section.html')">C-section</button>
+    <button onclick="goTo('d-section.html')">D-section</button>
+    <button onclick="goTo('e-section.html')">E-section</button>
+    <button onclick="goTo('co-chat.html')">All Sections Chat</button>
+    <button onclick="goTo('add-friends.html')">Add Friends</button>
+
+    <div class="friends">
+      <h3>Friends</h3>
+      <div id="friendList">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Toggle Button -->
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1>Global Chat (All Sections)</h1>
+    <p>please do not chat aggresively or type bad words this may result you to be banned</p>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chatWindow">
+      <!-- Messages will appear here -->
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <textarea class="message-input" id="messageInput" placeholder="Type a message..."></textarea>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("active");
+    }
+
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    // Load friends from localStorage
+    const friendListDiv = document.getElementById("friendList");
+    const friends = JSON.parse(localStorage.getItem("friends")) || [];
+
+    if (friends.length === 0) {
+      friendListDiv.innerHTML = "<p>No friends added yet.</p>";
+    } else {
+      friendListDiv.innerHTML = "";
+      friends.forEach(friend => {
+        const friendEl = document.createElement("div");
+        friendEl.className = "friend-link";
+        friendEl.textContent = friend;
+        friendEl.onclick = () => goTo(`chat-${friend}.html`);
+        friendListDiv.appendChild(friendEl);
+      });
+    }
+
+    // Get the current user's name (stored in localStorage)
+    const username = localStorage.getItem("username") || "Anonymous";
+
+    // Handle message sending
+    document.getElementById("messageInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        const messageText = this.value.trim();
+        if (messageText) {
+          const message = document.createElement("div");
+          message.className = "message own";
+          message.innerHTML = `<div class="message-header">${username}</div><p>${messageText}</p><span>Just now</span>`;
+          document.getElementById("chatWindow").appendChild(message);
+          this.value = "";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
