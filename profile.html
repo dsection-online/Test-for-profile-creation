@@ -1,167 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Edit Profile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .container {
-      background-color: #1e1e1e;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
-      max-width: 400px;
-      width: 100%;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input, textarea, label {
-      display: block;
-      width: 100%;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-
-    input[type="file"] {
-      border: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #4caf50;
-      border: none;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    .terms {
-      margin-top: 10px;
-    }
-
-    .terms-content {
-      display: none;
-      background-color: #2a2a2a;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-
-    .show {
-      display: block;
-    }
-  </style>
-</head>
 <body>
+  <div class="container">
+    <h2>Edit Profile</h2>
 
-<div class="container">
-  <h2>Edit Profile</h2>
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Enter your name">
 
-  <label for="name">Name</label>
-  <input type="text" id="name" placeholder="Enter your name">
+    <label for="hobbies">Hobbies</label>
+    <textarea id="hobbies" rows="3" placeholder="Your hobbies..."></textarea>
 
-  <label for="hobbies">Hobbies</label>
-  <textarea id="hobbies" rows="3" placeholder="Your hobbies..."></textarea>
+    <label for="profilePic">Profile Picture</label>
+    <input type="file" id="profilePic" accept="image/*">
 
-  <label for="profilePic">Profile Picture</label>
-  <input type="file" id="profilePic" accept="image/*">
-
-  <div class="terms">
-    <a href="#" id="toggleTerms">View Terms of Service</a>
-    <div class="terms-content" id="termsText">
-      <p>By saving your profile, you agree to our Terms of Service and Privacy Policy.</p>
+    <div class="terms">
+      <a href="#" id="toggleTerms">View Terms of Service</a>
+      <div class="terms-content" id="termsText">
+        <p>By saving your profile, you agree to our Terms of Service and Privacy Policy.</p>
+      </div>
+      <label>
+        <input type="checkbox" id="agree"> I agree to the Terms of Service
+      </label>
     </div>
-    <label>
-      <input type="checkbox" id="agree"> I agree to the Terms of Service
-    </label>
+
+    <button id="saveBtn" onclick="saveProfile()">Save Changes</button>
+    <div id="loading" style="display:none; text-align:center; margin-top:15px;">Saving... Please wait</div>
   </div>
 
-  <button onclick="saveProfile()">Save Changes</button>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+      authDomain: "section-is-united.firebaseapp.com",
+      projectId: "section-is-united",
+      storageBucket: "section-is-united.appspot.com",
+      messagingSenderId: "32995484693",
+      appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
-    authDomain: "section-is-united.firebaseapp.com",
-    projectId: "section-is-united",
-    storageBucket: "section-is-united.appspot.com",
-    messagingSenderId: "32995484693",
-    appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
+    window.saveProfile = async function () {
+      const saveBtn = document.getElementById("saveBtn");
+      const loading = document.getElementById("loading");
 
-  window.saveProfile = async function () {
-    const username = localStorage.getItem("username");
-    const name = document.getElementById("name").value;
-    const hobbies = document.getElementById("hobbies").value;
-    const agreed = document.getElementById("agree").checked;
-    const profilePic = document.getElementById("profilePic").files[0];
+      saveBtn.disabled = true;
+      loading.style.display = "block";
 
-    if (!username) {
-      alert("Username not found. Please register again.");
-      window.location.href = "index.html";
-      return;
-    }
+      const username = localStorage.getItem("username");
+      const name = document.getElementById("name").value.trim();
+      const hobbies = document.getElementById("hobbies").value.trim();
+      const agreed = document.getElementById("agree").checked;
+      const profilePic = document.getElementById("profilePic").files[0];
 
-    if (!agreed) {
-      alert("You must agree to the Terms of Service.");
-      return;
-    }
+      if (!username) {
+        alert("Username not found. Please register again.");
+        window.location.href = "registration.html";
+        return;
+      }
 
-    let photoURL = "";
+      if (!agreed) {
+        alert("You must agree to the Terms of Service.");
+        saveBtn.disabled = false;
+        loading.style.display = "none";
+        return;
+      }
 
-    if (profilePic) {
-      const picRef = ref(storage, `profilePics/${username}.jpg`);
-      await uploadBytes(picRef, profilePic);
-      photoURL = await getDownloadURL(picRef);
-    }
+      try {
+        let photoURL = "";
 
-    await setDoc(doc(db, "users", username), {
-      username,
-      name,
-      hobbies,
-      profilePic: photoURL
+        if (profilePic) {
+          const picRef = ref(storage, `profilePics/${username}.jpg`);
+          await uploadBytes(picRef, profilePic);
+          photoURL = await getDownloadURL(picRef);
+        }
+
+        await setDoc(doc(db, "users", username), {
+          username,
+          name,
+          hobbies,
+          profilePic: photoURL
+        });
+
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        alert("Something went wrong. Please try again.");
+        console.error(error);
+        saveBtn.disabled = false;
+        loading.style.display = "none";
+      }
+    };
+
+    // Toggle terms text
+    document.getElementById("toggleTerms").addEventListener("click", (e) => {
+      e.preventDefault();
+      const termsText = document.getElementById("termsText");
+      termsText.classList.toggle("show");
     });
-
-    alert("Profile saved!");
-    window.location.href = "dashboard.html";
-  };
-
-  // Terms toggle
-  document.getElementById("toggleTerms").addEventListener("click", (e) => {
-    e.preventDefault();
-    const termsText = document.getElementById("termsText");
-    termsText.classList.toggle("show");
-  });
-</script>
-
+  </script>
 </body>
-</html>
