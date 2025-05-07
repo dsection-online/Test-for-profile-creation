@@ -1,231 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>All Sections Chat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Chat</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #121212;
       color: white;
-      display: flex;
-      flex-direction: column;
       height: 100vh;
+      overflow: hidden;
+      display: flex;
     }
 
-    /* Sidebar styles */
     .sidebar {
       width: 250px;
-      height: 100vh;
-      background-color: #1f1f1f;
+      background-color: #1e1e1e;
+      height: 100%;
       position: fixed;
-      left: -250px;
       top: 0;
+      left: -250px;
       transition: left 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-
-    .sidebar.active {
-      left: 0;
-    }
-
-    .sidebar h3 {
-      margin-top: 0;
-      margin-bottom: 15px;
-      font-size: 18px;
-    }
-
-    .sidebar button {
-      background: none;
-      border: none;
-      color: white;
-      text-align: left;
-      padding: 10px 0;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .sidebar .friends {
-      margin-top: 20px;
-      border-top: 1px solid #444;
-      padding-top: 10px;
-    }
-
-    /* Toggle button */
-    .toggle-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background-color: #3f51b5;
-      border: none;
-      color: white;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
+      padding-top: 60px;
       z-index: 2;
     }
 
-    /* Main content */
-    .main {
-      flex-grow: 1;
-      padding: 50px 20px 20px 80px;
-      margin-left: 0;
-      transition: margin-left 0.3s ease;
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 15px;
+      text-decoration: none;
+      border-bottom: 1px solid #333;
     }
 
-    .sidebar.active ~ .main {
+    .sidebar a:hover {
+      background-color: #333;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .open-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      background: none;
+      color: white;
+      border: none;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .main-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+      width: 100%;
+    }
+
+    .main-content.shifted {
       margin-left: 250px;
     }
 
-    h1 {
-      margin-top: 0;
-    }
-
-    .friend-link {
-      color: #80cbc4;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-
-    .friend-link:hover {
-      text-decoration: underline;
-    }
-
-    /* Chat section */
-    .chat-window {
+    #chat-box {
       flex-grow: 1;
       overflow-y: auto;
-      margin-bottom: 60px; /* Space for the message input */
-      padding: 20px;
-      background-color: #2a2a2a;
-      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    #message-input {
+      display: flex;
+      padding: 1rem;
+      background-color: #1f1f1f;
+    }
+
+    #messageInput {
+      flex-grow: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #sendBtn {
+      margin-left: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     .message {
-      background-color: #444;
-      padding: 8px;
-      border-radius: 5px;
       margin-bottom: 10px;
+      padding: 5px 10px;
+      background: #2a2a2a;
+      border-radius: 5px;
     }
 
-    .message.own {
-      background-color: #3f51b5;
-      color: white;
-    }
-
-    .message p {
-      margin: 0;
-    }
-
-    .message span {
-      font-size: 12px;
-      color: #bbb;
-    }
-
-    .message-header {
-      font-weight: bold;
-      color: #80cbc4;
-      margin-bottom: 5px;
-    }
-
-    .message-input {
-      width: 100%;
-      padding: 10px;
-      background-color: #333;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      margin: 0;
+    .message strong {
+      color: #90caf9;
     }
   </style>
 </head>
 <body>
 
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <h3>Menu</h3>
-    <button onclick="goTo('a-section.html')">A-section</button>
-    <button onclick="goTo('b-section.html')">B-section</button>
-    <button onclick="goTo('c-section.html')">C-section</button>
-    <button onclick="goTo('d-section.html')">D-section</button>
-    <button onclick="goTo('e-section.html')">E-section</button>
-    <button onclick="goTo('co-chat.html')">All Sections Chat</button>
-    <button onclick="goTo('add-friends.html')">Add Friends</button>
-
-    <div class="friends">
-      <h3>Friends</h3>
-      <div id="friendList">Loading...</div>
-    </div>
+  <div id="sidebar" class="sidebar">
+    <a href="#" onclick="navigateTo('a-section')">A-section</a>
+    <a href="#" onclick="navigateTo('b-section')">B-section</a>
+    <a href="#" onclick="navigateTo('c-section')">C-section</a>
+    <a href="#" onclick="navigateTo('d-section')">D-section</a>
+    <a href="#" onclick="navigateTo('e-section')">E-section</a>
+    <a href="co-chat.html">Global Chat</a>
   </div>
-
-  <!-- Toggle Button -->
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
   <!-- Main Content -->
-  <div class="main">
-    <h1>D section</h1>
-    <p>ah yeah its ma section and kodi lives here</p>
+  <div class="main-content" id="main-content">
+    <button class="open-btn" onclick="toggleSidebar()">☰</button>
 
-    <!-- Chat Window -->
-    <div class="chat-window" id="chatWindow">
-      <!-- Messages will appear here -->
+    <div id="chat-box">
+      <h2>d section chat</h2>
+      <div id="messages"></div>
+    </div>
+
+    <div id="message-input">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
     </div>
   </div>
 
-  <!-- Message Input -->
-  <textarea class="message-input" id="messageInput" placeholder="Type a message..."></textarea>
+  <!-- Firebase + Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("active");
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+      authDomain: "section-is-united.firebaseapp.com",
+      projectId: "section-is-united",
+      storageBucket: "section-is-united.appspot.com",
+      messagingSenderId: "32995484693",
+      appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+    };
 
-    function goTo(page) {
-      window.location.href = page;
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    // Load friends from localStorage
-    const friendListDiv = document.getElementById("friendList");
-    const friends = JSON.parse(localStorage.getItem("friends")) || [];
+    let username = "Guest";
 
-    if (friends.length === 0) {
-      friendListDiv.innerHTML = "<p>No friends added yet.</p>";
-    } else {
-      friendListDiv.innerHTML = "";
-      friends.forEach(friend => {
-        const friendEl = document.createElement("div");
-        friendEl.className = "friend-link";
-        friendEl.textContent = friend;
-        friendEl.onclick = () => goTo(`chat-${friend}.html`);
-        friendListDiv.appendChild(friendEl);
-      });
-    }
+    signInAnonymously(auth).then(() => {
+      console.log("Signed in anonymously");
+    });
 
-    // Get the current user's name (stored in localStorage)
-    const username = localStorage.getItem("username") || "Anonymous";
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const messageText = document.getElementById("messageInput").value.trim();
+      if (!messageText) return;
 
-    // Handle message sending
-    document.getElementById("messageInput").addEventListener("keypress", function(event) {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        const messageText = this.value.trim();
-        if (messageText) {
-          const message = document.createElement("div");
-          message.className = "message own";
-          message.innerHTML = `<div class="message-header">${username}</div><p>${messageText}</p><span>Just now</span>`;
-          document.getElementById("chatWindow").appendChild(message);
-          this.value = "";
-        }
+      try {
+        await addDoc(collection(db, "global-chat"), {
+          senderName: username,
+          message: messageText,
+          timestamp: serverTimestamp()
+        });
+        document.getElementById("messageInput").value = "";
+      } catch (error) {
+        console.error("Error sending message:", error);
       }
     });
+
+    const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
+    onSnapshot(q, (snapshot) => {
+      const messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const msg = document.createElement("div");
+        msg.classList.add("message");
+        msg.innerHTML = `<strong>${data.senderName || "Anon"}:</strong> ${data.message}`;
+        messagesDiv.appendChild(msg);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Sidebar toggle
+    window.toggleSidebar = () => {
+      const sidebar = document.getElementById("sidebar");
+      const main = document.getElementById("main-content");
+      sidebar.classList.toggle("open");
+      main.classList.toggle("shifted");
+    };
+
+    // Navigation
+    window.navigateTo = (section) => {
+      window.location.href = section + ".html";
+    };
   </script>
 </body>
 </html>
