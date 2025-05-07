@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edit Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      display: flex;
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+      max-width: 900px;
+      width: 90%;
+      gap: 40px;
+    }
+
+    .left, .right {
+      flex: 1;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background: #2e2e2e;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    .profile-pic {
+      width: 100%;
+      max-width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      background-color: #2e2e2e;
+    }
+
+    a {
+      color: #4caf50;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    #termsText {
+      margin-top: 10px;
+      font-size: 0.9em;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="left">
+    <h2>Edit Profile</h2>
+    <form id="profileForm">
+      <input type="text" id="name" placeholder="Your Name" />
+      <textarea id="hobbies" placeholder="Your Hobbies"></textarea>
+
+      <!-- Terms of Service -->
+      <div style="margin-top: 20px;">
+        <a onclick="toggleTerms()">View Terms of Service</a>
+        <div id="termsText">
+          <p>
+            By editing your profile, you agree to follow community guidelines, respect others' content, and not misuse this platform. Your data will be stored securely and used only for platform functionality.
+          </p>
+          <label>
+            <input type="checkbox" id="agreeTerms" /> I agree to the Terms of Service
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" disabled>Save Changes</button>
+    </form>
+  </div>
+
+  <div class="right">
+    <h3>Profile Picture</h3>
+    <img src="" alt="Profile Picture" id="profilePic" class="profile-pic" />
+    <input type="file" id="photoInput" accept="image/*" />
+    <button type="button" onclick="uploadPhoto()">Upload Photo</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+    authDomain: "section-is-united.firebaseapp.com",
+    projectId: "section-is-united",
+    storageBucket: "section-is-united.appspot.com",
+    messagingSenderId: "32995484693",
+    appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  const username = localStorage.getItem("username");
+  const nameInput = document.getElementById("name");
+  const hobbiesInput = document.getElementById("hobbies");
+  const profilePic = document.getElementById("profilePic");
+  const saveButton = document.querySelector("#profileForm button");
+  const agreeCheckbox = document.getElementById("agreeTerms");
+
+  // Load profile data
+  async function loadProfile() {
+    if (!username) return alert("No user logged in.");
+    const docRef = doc(db, "users", username);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      nameInput.value = data.name || "";
+      hobbiesInput.value = data.hobbies || "";
+      profilePic.src = data.photoURL || "https://via.placeholder.com/200";
+    }
+  }
+
+  loadProfile();
+
+  // Form submit
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!username) return alert("No user logged in.");
+    if (!agreeCheckbox.checked) return alert("Please agree to the Terms of Service.");
+
+    const docRef = doc(db, "users", username);
+    await updateDoc(docRef, {
+      name: nameInput.value,
+      hobbies: hobbiesInput.value
+    });
+
+    alert("Profile updated!");
+  });
+
+  // Upload profile photo
+  window.uploadPhoto = async function () {
+    const file = document.getElementById("photoInput").files[0];
+    if (!file) return alert("Please select a file.");
+
+    const storageRef = ref(storage, `profile_pics/${username}.jpg`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const docRef = doc(db, "users", username);
+    await updateDoc(docRef, { photoURL: downloadURL });
+
+    profilePic.src = downloadURL;
+    alert("Photo uploaded!");
+  };
+
+  // Terms toggle
+  window.toggleTerms = function () {
+    const terms = document.getElementById("termsText");
+    terms.style.display = terms.style.display === "none" ? "block" : "none";
+  };
+
+  // Enable save only if terms agreed
+  agreeCheckbox.addEventListener("change", () => {
+    saveButton.disabled = !agreeCheckbox.checked;
+  });
+</script>
+
+</body>
+</html>

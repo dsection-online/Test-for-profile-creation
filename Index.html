@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .register-box {
+      background: #1e1e1e;
+      color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    .register-box h2 {
+      margin-bottom: 20px;
+    }
+
+    .register-box input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #555;
+      background: #2e2e2e;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .register-box input::placeholder {
+      color: #aaa;
+    }
+
+    .register-box button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .register-box button:hover {
+      background-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay">
+  <div class="register-box">
+    <h2>enter your real name</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Enter username" required />
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>
+
+<!-- Firebase Scripts -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA5HXzI5mh-0Foj-mZAUfvm_FmEofC7-BA",
+    authDomain: "section-is-united.firebaseapp.com",
+    projectId: "section-is-united",
+    storageBucket: "section-is-united.firebasestorage.app",
+    messagingSenderId: "32995484693",
+    appId: "1:32995484693:web:45a26e998f6685e8b1da1c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("username").value.trim();
+
+    if (!username) return alert("enter your name ra jako");
+
+    const userRef = doc(db, "users", username);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      alert("this name is taken.");
+    } else {
+      await setDoc(userRef, {
+        username: username,
+        createdAt: new Date().toISOString()
+      });
+      alert("Registered successfully!");
+      // Optional: save to localStorage or redirect
+      // localStorage.setItem("username", username);
+      // window.location.href = "home.html";
+    }
+  });
+</script>
+
+</body>
+</html>
